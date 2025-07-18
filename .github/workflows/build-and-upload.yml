@@ -10,6 +10,8 @@ on:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -17,32 +19,46 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
 
       - name: Download and set up sing-box
         run: |
-          LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | jq -r '.assets[] | select(.name | contains("linux-amd64.tar.gz")) | .browser_download_url')
-          LATEST_VERSION=$(echo "$LATEST_RELEASE_URL" | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+')
-          FILENAME="sing-box-${LATEST_VERSION:1}-linux-amd64.tar.gz"
-          wget -O "$FILENAME" "$LATEST_RELEASE_URL"
-          tar -xvf "$FILENAME"
-          sudo mv "sing-box-${LATEST_VERSION:1}-linux-amd64/sing-box" /usr/local/bin
+          curl -fsSL https://sing-box.app/install.sh | sudo sh
 
-      - name: Run compile-rules.js
-        run: node compile-rules.js
+      - name: Run compile-rules.js for light version
+        run: node compile-rules.js --version=light
 
-      - name: Compile custom-rules.srs
-        run: sing-box rule-set compile --output rsr-security.srs compiled-rules.json
+      - name: Run compile-rules.js for medium version
+        run: node compile-rules.js --version=medium
+
+      - name: Run compile-rules.js for current version
+        run: node compile-rules.js --version=full
+
+      - name: Verify compiled-rules.json existence
+        run: ls -l compiled-rules-light.json compiled-rules-medium.json compiled-rules-full.json
+
+      - name: Compile light-rules.srs
+        run: sing-box rule-set compile --output rsr-security-light.srs compiled-rules-light.json
+
+      - name: Compile medium-rules.srs
+        run: sing-box rule-set compile --output rsr-security-medium.srs compiled-rules-medium.json
+
+      - name: Compile full-rules.srs
+        run: sing-box rule-set compile --output rsr-security-full.srs compiled-rules-full.json
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: rsr-security.srs
-          tag_name: "hourly-${{ github.run_number }}"
-          name: "Hourly Build ${{ github.run_number }}"
-          body: "This is an automated hourly build of custom-rules.srs."
+          files: |
+            rsr-security-light.srs
+            rsr-security-medium.srs
+            rsr-security-full.srs
+          tag_name: "latest"
+          name: "Latest Build"
+          body: "This is the latest automated build of the rule sets."
+          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

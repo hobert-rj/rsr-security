@@ -4,10 +4,10 @@ const net = require('net');
 
 // --- Configuration ---
 const AXIOS_TIMEOUT = 20000;
-const OUTPUT_FILENAME = 'compiled-rules.json';
+let OUTPUT_FILENAME = 'compiled-rules.json';
 
-// 1. Define the list of sources from your input
-const sources = [
+// Define different source configurations
+const allSources = [
     {
         "tag": "oisd-domains",
         "url": "https://raw.githubusercontent.com/sjhgvr/oisd/main/domainswild2_big.txt",
@@ -29,6 +29,22 @@ const sources = [
         "url": "https://www.spamhaus.org/drop/dropv6.txt",
     }
 ];
+
+const lightSources = [
+    allSources[0], // oisd-domains
+];
+
+const mediumSources = [
+    allSources[0], // oisd-domains
+    allSources[1], // hagezi-tif-domains
+    allSources[2], // phishing-army-domains
+];
+
+const fullSources = allSources;
+
+// 1. Define the list of sources from your input
+// This will be dynamically set based on command line arguments
+let sources = [];
 
 // Regular expressions to clean entries
 const adblockHostRegex = /^(?:0\\.0\\.0\\.0|127\\.0\\.0\\.1)\\s+([^\\s]+)/;
@@ -58,7 +74,7 @@ function parseLine(line, domainSet, ipSet) {
     }
 
     // 4. Check for Adblock Plus format (e.g., ||example.com^)
-    const abpMatch = cleanedLine.match(/^\\|\\|?([a-z0-9_.-]+)\\^?$/);
+    const abpMatch = cleanedLine.match(/^\|\|([a-z0-9_.-]+)\^?$/);
     if (abpMatch) {
         domainSet.add(abpMatch[1]);
         return true;
@@ -66,7 +82,7 @@ function parseLine(line, domainSet, ipSet) {
 
     // 5. Fallback for plain domain lists (stricter validation)
     // This regex ensures it's a valid-looking hostname and not a URL with a path
-    if (/^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$/.test(cleanedLine)) {
+    if (/^[a-z0-9.-]+\.[a-z]{2,}$/.test(cleanedLine)) {
         domainSet.add(cleanedLine);
         return true;
     }
@@ -78,7 +94,38 @@ function parseLine(line, domainSet, ipSet) {
  * Main function to download, parse, and compile the ruleset.
  */
 async function compileRuleSet() {
-    console.log('🚀 Starting compilation process...');
+    const args = process.argv.slice(2);
+    let version = 'full'; // Default version
+
+    if (args.length > 0) {
+        const versionArg = args[0].split('=');
+        if (versionArg[0] === '--version' && versionArg.length === 2) {
+            version = versionArg[1].toLowerCase();
+        } else {
+            console.error("Usage: node compile-rules.js [--version=<light|medium|full>]");
+            process.exit(1);
+        }
+    }
+
+    switch (version) {
+        case 'light':
+            sources = lightSources;
+            OUTPUT_FILENAME = 'compiled-rules-light.json';
+            break;
+        case 'medium':
+            sources = mediumSources;
+            OUTPUT_FILENAME = 'compiled-rules-medium.json';
+            break;
+        case 'full':
+            sources = fullSources;
+            OUTPUT_FILENAME = 'compiled-rules-full.json';
+            break;
+        default:
+            console.error(`Invalid version: ${version}. Choose from light, medium, or full.`);
+            process.exit(1);
+    }
+
+    console.log(`🚀 Starting compilation process for ${version} version...`);
 
     const domainSuffixes = new Set();
     const ipCidrs = new Set();

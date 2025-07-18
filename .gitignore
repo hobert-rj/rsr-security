@@ -1,4 +1,7 @@
 node_modules/
-*.json
+compiled-rules.json
+compiled-rules-light.json
+compiled-rules-medium.json
+compiled-rules-full.json
 *.srs
 .env 

@@ -21,33 +21,75 @@ This results in a unified ruleset (`rsr-security.srs`) for blocking these types 
 
 ## Usage
 
-To compile the ruleset, run:
+To compile the ruleset, you can choose from different versions:
 
-```bash
-node compile-rules.js
-```
+*   **Light Version**: Includes essential domain blocklists.
+    ```bash
+    node compile-rules.js --version=light
+    ```
+    This will generate `compiled-rules-light.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
+    ```bash
+    sing-box rule-set compile --output rsr-security-light.srs compiled-rules-light.json
+    ```
 
-This will generate `compiled-rules.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
+*   **Medium Version**: Includes a broader set of domain and phishing blocklists.
+    ```bash
+    node compile-rules.js --version=medium
+    ```
+    This will generate `compiled-rules-medium.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
+    ```bash
+    sing-box rule-set compile --output rsr-security-medium.srs compiled-rules-medium.json
+    ```
 
-```bash
-sing-box rule-set compile --output rsr-security.srs compiled-rules.json
-```
-
-The `rsr-security.srs` file can then be used with Sing-box. You can find the latest compiled `rsr-security.srs` in the [GitHub Releases](https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security.srs).
+*   **Current Version (Default)**: Includes all available domain and IP blocklists.
+    ```bash
+    node compile-rules.js --version=full
+    # or simply
+    node compile-rules.js
+    ```
+    This will generate `compiled-rules-full.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
+    ```bash
+    sing-box rule-set compile --output rsr-security-full.srs compiled-rules-full.json
+    ```
 
 ## Sing-box Guide
 
-To use the compiled `rsr-security.srs` with Sing-box, add a rule set configuration similar to the following in your Sing-box configuration file (e.g., `config.json`):
+To use the compiled `.srs` files with Sing-box, add a rule set configuration similar to the following in your Sing-box configuration file (e.g., `config.json`). You can choose the version that best suits your needs:
 
+### Light Version
 ```json
 {
-  "tag": "rsr-security-rules",
+  "tag": "rsr-security-light-rules",
   "type": "remote",
   "format": "binary",
-  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security.srs",
+  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-light.srs",
   "download_detour": "direct",
   "update_interval": "1h"
 }
 ```
 
-This configuration will instruct Sing-box to download and update the ruleset every 1 hours.
+### Medium Version
+```json
+{
+  "tag": "rsr-security-medium-rules",
+  "type": "remote",
+  "format": "binary",
+  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-medium.srs",
+  "download_detour": "direct",
+  "update_interval": "1h"
+}
+```
+
+### Current Version
+```json
+{
+  "tag": "rsr-security-full-rules",
+  "type": "remote",
+  "format": "binary",
+  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-full.srs",
+  "download_detour": "direct",
+  "update_interval": "1h"
+}
+```
+
+These configurations will instruct Sing-box to download and update the rulesets every 1 hour.
