@@ -1,6 +1,6 @@
-# RSR-Security Compiler
+# SRS-Security Compiler
 
-This project compiles various adblock and IP blocklists into a unified ruleset (`rsr-security.srs`) for use with Sing-box.
+This project compiles various adblock and IP blocklists into a unified ruleset (`srs-security.srs`) for use with Sing-box.
 
 ## Setup
 
@@ -17,7 +17,7 @@ This project compiles various lists to block a comprehensive range of undesirabl
 *   **Domains** commonly associated with advertising, tracking, and phishing activities.
 *   **IP addresses (both IPv4 and IPv6)** identified as sources of spam or other malicious traffic.
 
-This results in a unified ruleset (`rsr-security.srs`) for blocking these types of unwanted connections.
+This results in a unified ruleset (`srs-security.srs`) for blocking these types of unwanted connections.
 
 ## Usage
 
@@ -29,7 +29,7 @@ To compile the ruleset, you can choose from different versions:
     ```
     This will generate `compiled-rules-light.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
     ```bash
-    sing-box rule-set compile --output rsr-security-light.srs compiled-rules-light.json
+    sing-box rule-set compile --output srs-security-light.srs compiled-rules-light.json
     ```
 
 *   **Medium Version**: Includes a broader set of domain and phishing blocklists.
@@ -38,7 +38,7 @@ To compile the ruleset, you can choose from different versions:
     ```
     This will generate `compiled-rules-medium.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
     ```bash
-    sing-box rule-set compile --output rsr-security-medium.srs compiled-rules-medium.json
+    sing-box rule-set compile --output srs-security-medium.srs compiled-rules-medium.json
     ```
 
 *   **Current Version (Default)**: Includes all available domain and IP blocklists.
@@ -49,7 +49,7 @@ To compile the ruleset, you can choose from different versions:
     ```
     This will generate `compiled-rules-full.json`. To convert it to a Sing-box compatible binary ruleset (`.srs` file), run:
     ```bash
-    sing-box rule-set compile --output rsr-security-full.srs compiled-rules-full.json
+    sing-box rule-set compile --output srs-security-full.srs compiled-rules-full.json
     ```
 
 ## Sing-box Guide
@@ -59,10 +59,10 @@ To use the compiled `.srs` files with Sing-box, add a rule set configuration sim
 ### Light Version
 ```json
 {
-  "tag": "rsr-security-light-rules",
+  "tag": "srs-security-light-rules",
   "type": "remote",
   "format": "binary",
-  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-light.srs",
+  "url": "https://github.com/hobert-rj/srs-security/releases/latest/download/srs-security-light.srs",
   "download_detour": "direct",
   "update_interval": "1h"
 }
@@ -71,10 +71,10 @@ To use the compiled `.srs` files with Sing-box, add a rule set configuration sim
 ### Medium Version
 ```json
 {
-  "tag": "rsr-security-medium-rules",
+  "tag": "srs-security-medium-rules",
   "type": "remote",
   "format": "binary",
-  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-medium.srs",
+  "url": "https://github.com/hobert-rj/srs-security/releases/latest/download/srs-security-medium.srs",
   "download_detour": "direct",
   "update_interval": "1h"
 }
@@ -83,10 +83,10 @@ To use the compiled `.srs` files with Sing-box, add a rule set configuration sim
 ### Current Version
 ```json
 {
-  "tag": "rsr-security-full-rules",
+  "tag": "srs-security-full-rules",
   "type": "remote",
   "format": "binary",
-  "url": "https://github.com/hobert-rj/rsr-security/releases/latest/download/rsr-security-full.srs",
+  "url": "https://github.com/hobert-rj/srs-security/releases/latest/download/srs-security-full.srs",
   "download_detour": "direct",
   "update_interval": "1h"
 }

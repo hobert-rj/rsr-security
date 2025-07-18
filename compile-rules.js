@@ -130,6 +130,16 @@ async function compileRuleSet() {
     const domainSuffixes = new Set();
     const ipCidrs = new Set();
 
+    // Manually added domains
+    const manualDomains = [
+        'j.ad',
+    ];
+
+    console.log('➕ Adding manual domains...');
+    for (const domain of manualDomains) {
+        domainSuffixes.add(domain);
+    }
+
     const downloadPromises = sources.map(source => {
         console.log(`📥 Downloading ${source.tag}...`);
         return axios.get(source.url, { timeout: AXIOS_TIMEOUT })

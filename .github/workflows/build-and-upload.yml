@@ -24,6 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+rw /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+
       - name: Download and set up sing-box
         run: |
           curl -fsSL https://sing-box.app/install.sh | sudo sh
@@ -41,20 +50,30 @@ jobs:
         run: ls -l compiled-rules-light.json compiled-rules-medium.json compiled-rules-full.json
 
       - name: Compile light-rules.srs
-        run: sing-box rule-set compile --output rsr-security-light.srs compiled-rules-light.json
+        run: sing-box rule-set compile --output srs-security-light.srs compiled-rules-light.json
 
       - name: Compile medium-rules.srs
-        run: sing-box rule-set compile --output rsr-security-medium.srs compiled-rules-medium.json
+        run: sing-box rule-set compile --output srs-security-medium.srs compiled-rules-medium.json
 
       - name: Compile full-rules.srs
-        run: sing-box rule-set compile --output rsr-security-full.srs compiled-rules-full.json
+        run: sing-box rule-set compile --output srs-security-full.srs compiled-rules-full.json
+
+      - name: Create rsr-security-full.srs copy
+        run: cp srs-security-full.srs rsr-security-full.srs
+
+      - name: Delete existing 'latest' release (if any)
+        run: |
+          gh release view latest > /dev/null 2>&1 && gh release delete latest --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            rsr-security-light.srs
-            rsr-security-medium.srs
+            srs-security-light.srs
+            srs-security-medium.srs
+            srs-security-full.srs
             rsr-security-full.srs
           tag_name: "latest"
           name: "Latest Build"
